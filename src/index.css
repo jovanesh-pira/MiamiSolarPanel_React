@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/* Color Palet Bace on the Brand Color mabey need add some Colors to in this Sections */
+
+
+
+header .logo img{
+  @apply h-10 md:h-12 ;
+
+}
+
+.swiper-pagination {
+  width: 7rem !important;
+  left: 50% !important;               
+  transform: translateX(-50%) !important;
+  @apply mb-5
+   
+}
+
+.swiper-pagination-bullet {
+  width:1rem !important;
+  height: 1rem !important;
+background-color: white !important;
+}
+
+
+
+
+
+/* styles for the News section and News Cards  */
+.News_Card_Holder{
+  @apply flex flex-col md:flex-row gap-y-4 md:gap-x-8 shadow-md hover:shadow-xl cursor-pointer transition-shadow duration-300 shadow-gray-700/20 rounded-2xl overflow-hidden
+}
+
+.News_Card_Holder .Content_news{
+  @apply flex flex-col flex-1 py-8 px-10 md:pl-5 md:pr-20
+}
+.News_Card_Holder .btn_news {
+  @apply text-white bg-black w-full  text-center md:text-left md:w-fit px-5 py-2 rounded-md text-sm font-normal hover:underline
+}
+
+
