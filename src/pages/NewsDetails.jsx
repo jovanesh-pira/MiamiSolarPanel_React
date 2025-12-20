@@ -4,12 +4,15 @@ import { Link } from "react-router-dom";
 import { sanityClient } from "../lib/sanity";
 import { urlFor } from "../lib/sanity";
 import { NEWS } from "../Alldata/newsData";
+import Loading from "../Component/Loading";
 function NewsDetails() {
   let { id } = useParams();
 
   const [news, setNews] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     sanityClient
       .fetch(
         `*[_type == "news" && _id == $id][0]{
@@ -25,11 +28,26 @@ function NewsDetails() {
         { id }
       )
       .then((data) => {
+        if (!data) {
+          setNews(null);
+          setLoading(false);
+          return;
+        }
         // add an `id` alias so other parts of the app can compare with static `NEWS` items
         setNews({ ...data, id: data._id });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch news:", err);
+        setNews(null);
+        setLoading(false);
       });
   }, [id]);
   // ensure id type matches (use string comparison) to avoid loose equality issues
+
+  if (loading) {
+    return <Loading text="Loading news..." />;
+  }
 
   if (!news) {
     return (
