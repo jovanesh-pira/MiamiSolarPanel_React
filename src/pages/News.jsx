@@ -3,15 +3,24 @@ import React, { useMemo, useState, useEffect } from "react";
 import { sanityClient } from "../lib/sanity";
 import NewsCard from "../Component/NewsCard";
 import Button from "../Component/Button";
-
-const CATEGORIES = ["All", "Technology", "Company", "Projects", "Community"];
+import Loading from "../Component/Loading";
 
 export default function NewsPage() {
+  const [categories, setCategories] = useState(["All"]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 4;
+
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setCategoriesLoading(true);
+
     sanityClient
       .fetch(
         `
@@ -26,9 +35,22 @@ export default function NewsPage() {
         `
       )
       .then((data) => {
-        console.log(data);
-
         setNews(data.map((item) => ({ ...item, id: item._id })));
+
+        // derive categories from fetched data (server-driven)
+        const uniqueCats = Array.from(
+          new Set(data.map((i) => i.category).filter(Boolean))
+        );
+        setCategories(["All", ...uniqueCats]);
+        setCategoriesLoading(false);
+
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch news:", err);
+        setError("Failed to load news. Please try again.");
+        setCategories(["All"]);
+        setCategoriesLoading(false);
         setLoading(false);
       });
   }, []);
@@ -47,6 +69,40 @@ export default function NewsPage() {
       return matchCategory && matchQuery;
     });
   }, [news, activeCategory, query]);
+
+  // If categories change and the active category is no longer available, reset to 'All'
+  useEffect(() => {
+    if (!categories.includes(activeCategory)) {
+      setActiveCategory("All");
+    }
+  }, [categories]);
+
+  // Reset to first page when filters/search/categories change
+  useEffect(() => {
+    setPage(1);
+  }, [activeCategory, query, categories]);
+
+  // Ensure the current page is within bounds when filtered results change
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(filteredNews.length / pageSize));
+    if (page > totalPages) setPage(totalPages);
+  }, [filteredNews, pageSize]);
+
+  // Pagination calculations
+  const total = filteredNews.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, total);
+  const pagedItems = filteredNews.slice(startIndex, endIndex);
+
+  // Build a compact list of page numbers to render
+  const pageNumbers = [];
+  const maxButtons = 7; // max page buttons to show
+  let startPage = Math.max(1, page - Math.floor(maxButtons / 2));
+  let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+  if (endPage - startPage + 1 < maxButtons)
+    startPage = Math.max(1, endPage - maxButtons + 1);
+  for (let p = startPage; p <= endPage; p++) pageNumbers.push(p);
 
   return (
     <>
@@ -82,23 +138,28 @@ export default function NewsPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
             {/* Category pills */}
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
-                <Button
-                  key={cat}
-                  type="button"
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-                    activeCategory === cat
-                      ? "bg-slate-900 text-white border-slate-900"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
-                  }`}
-                >
-                  {cat}
-                </Button>
-              ))}
+              {categoriesLoading
+                ? [1, 2, 3].map((s) => (
+                    <div
+                      key={s}
+                      className="w-20 h-8 bg-slate-200 rounded-full animate-pulse"
+                    />
+                  ))
+                : categories.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                        activeCategory === cat
+                          ? "bg-slate-900 text-white border-slate-900"
+                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
             </div>
-
-            {/* Search input */}
             <div className="w-full md:w-64">
               <input
                 type="text"
@@ -112,27 +173,82 @@ export default function NewsPage() {
 
           {/* News list */}
           {loading ? (
-            <div className="space-y-5">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className="bg-white rounded p-6 h-40 animate-pulse"
-                />
-              ))}
+            <Loading
+              variant="skeleton-list"
+              count={pageSize}
+              text="Loading news..."
+            />
+          ) : error ? (
+            <div className="text-center p-8">
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           ) : (
-            <div className="space-y-5">
-              {filteredNews.map((item) => (
-                <NewsCard key={item.id || item._id} item={item} />
-              ))}
+            <>
+              <div className="space-y-5">
+                {pagedItems.map((item) => (
+                  <NewsCard key={item.id || item._id} item={item} />
+                ))}
 
-              {/* Empty state if nothing matches filter */}
-              {filteredNews.length === 0 && (
-                <p className="text-sm text-slate-500">
-                  No articles found for this filter.
-                </p>
+                {/* Empty state if nothing matches filter */}
+                {total === 0 && (
+                  <p className="text-sm text-slate-500">
+                    No articles found for this filter.
+                  </p>
+                )}
+              </div>
+
+              {total > 0 && (
+                <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-slate-500">
+                    Showing {total === 0 ? 0 : startIndex + 1}–{endIndex} of{" "}
+                    {total}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className={`px-3 py-1 rounded ${
+                        page === 1 ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      disabled={page === 1}
+                    >
+                      Prev
+                    </button>
+
+                    {pageNumbers.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 rounded ${
+                          p === page
+                            ? "bg-slate-900 text-white"
+                            : "bg-white border border-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      className={`px-3 py-1 rounded ${
+                        page === totalPages
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={page === totalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
