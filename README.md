@@ -3,7 +3,7 @@
 A semi-commercial company website built with **React** and **Tailwind CSS**, focused on presenting products, services, and company content in a clean and user-friendly way.
 
 🔗 **Live Demo:**  
-(If live link exists, add it here)
+https://glittering-biscotti-4b1499.netlify.app/
 
 ---
 
