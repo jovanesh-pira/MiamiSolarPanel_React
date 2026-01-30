@@ -1,16 +1,77 @@
-# React + Vite
+# Miami Solar Panel Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A semi-commercial company website built with **React** and **Tailwind CSS**, focused on presenting products, services, and company content in a clean and user-friendly way.
 
-Currently, two official plugins are available:
+🔗 **Live Demo:**  
+(If live link exists, add it here)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React**
+- **Tailwind CSS**
+- **React Router**
+- **Sanity CMS**
+- **EmailJS**
+- **Vite**
+- **Git & GitHub**
 
-## Expanding the ESLint configuration
+> ⚠️ TypeScript is **not used** in this project.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## ✨ Features
+
+- Multi-page company website structure
+- Product listing page with **sorting and filtering**
+- Services section
+- News / Blog section powered by **Sanity CMS**
+- Email functionality using **EmailJS**
+- Client-side routing with React Router
+- Responsive layout for different screen sizes
+
+---
+
+## 📁 Project Purpose
+
+This project was built as a **practical front-end application**, simulating a real company website with semi-ecommerce features.
+
+The main goals were:
+- Working with React Router in a real project
+- Integrating a headless CMS (Sanity)
+- Implementing product listing logic (filter & sort)
+- Connecting email services from the frontend
+- Building a functional, user-facing application
+
+---
+
+## 🧠 Project Notes
+
+- The project is **functional but not fully refactored**
+- Code structure may be improved in future iterations
+- Focus was primarily on functionality rather than final architecture
+- Planned improvements include refactoring and potential migration to TypeScript
+
+---
+
+## 📌 Status
+
+> ⚠️ **In Progress / Maintained**  
+> The project may receive updates and improvements in the future.
+
+---
+
+## 👤 Author
+
+**Mohammad Piramun**  
+Front-End Developer  
+
+- GitHub: https://github.com/jovanesh-pira  
+- Portfolio: https://jovaneshpiramun.netlify.app/
+
+---
+
+## 📄 License
+
+This project is for learning and portfolio purposes.
